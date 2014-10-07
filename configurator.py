@@ -81,13 +81,8 @@ class MyWindow(QtGui.QWidget):
         self.show()
     @QtCore.Slot()
     def SelDep(self):
-        # s=self.treeWid.currentItem().text(1)
-        # QtGui.QMessageBox.information(self, 'Message', 'Dep ID:'+s)
-        self.tree(2)
-    # @QtCore.Slot()
-    # def MySelect(self):
-    #     s=self.listWid.currentItem ().text().split(' : ')
-    #     QtGui.QMessageBox.information(self, 'Message', 'User ID:'+s[0])
+        self.tree2Click()
+
     @QtCore.Slot()
     def InsertUser(self):
         conn=self.conn()
@@ -111,17 +106,34 @@ class MyWindow(QtGui.QWidget):
         conn=self.conn()
         if(conn.ConnectDB()):
             self.BD_Connected()
-            self.tree(1)
+            self.treeRoot()
         else:
             self.BD_NotConnected()
 
-    def tree(self,i):
+    
+
+
+    def tree2Click(self):# DoubleClick на подразделении
         conn=self.conn()
-        list1=[]
-        if i==1:
-            list1=conn.showStruct()
-        if i==2:
-            list1=conn.showSelectDep(self.treeWid.currentItem().text(1))
+        SelectedItem=self.treeWid.currentItem()
+        list1=conn.showSelectDep(SelectedItem.text(1))
+        
+        for i in SelectedItem.takeChildren(): # Удаляем если до этого разворачивали элемент
+            SelectedItem.removeChild(i)
+
+        for l in sorted(list1):
+            itemId=str(l[0])
+            descr=str(l[1])
+            parent=str(l[2])
+            treeItem=QtGui.QTreeWidgetItem([descr,itemId,parent])
+            SelectedItem.removeChild(treeItem)
+            SelectedItem.addChild(treeItem)
+
+
+
+    def treeRoot(self):
+        conn=self.conn()
+        list1=conn.showStruct()
         treeItems=[]
         self.treeWid.clear()
 #-----------------------------------
@@ -137,7 +149,7 @@ class MyWindow(QtGui.QWidget):
         for item in treeItems:
             for itemj in treeItems[i:]:
                 if item.text(1)==itemj.text(2):
-                    item.insertChild(0,itemj)
+                    item.addChild(itemj)
             i+=1
             treeItemsFin.append(item)
 #--------------------------------------
