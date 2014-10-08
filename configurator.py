@@ -9,12 +9,18 @@ tmp=f.read().split('\n')
 sqlServer=tmp[0]
 BDname=tmp[1]
 
+idGroups={} #словарь с группами
 
 class MyWindow(QtGui.QWidget):
     
     def __init__(self):
         super(MyWindow, self).__init__()
         self.initUI()
+        global idGroups
+        conn=self.conn()
+        rows=conn.getGroups() # получаем список групп которые есть в базе и сохраняем в словарь
+        for row in rows:
+            idGroups[row[0]]=row[1]
         
     def initUI(self):               
 #---------------------------------------------------------------------gui    
@@ -27,11 +33,14 @@ class MyWindow(QtGui.QWidget):
         self.treeWid.setObjectName("treeWid")
         self.treeWid.setColumnCount(1)
         self.treeWid.setHeaderLabels([''])
-        self.listWid = QtGui.QListWidget(self)
-        self.listWid.setGeometry(QtCore.QRect(20, 140, 261, 181))
-        self.listWid.setObjectName("listWid")
+        self.listFIO = QtGui.QListWidget(self)
+        self.listFIO.setGeometry(QtCore.QRect(20, 140, 270, 91))
+        self.listFIO.setObjectName("listFIO")
+        self.listRoles = QtGui.QListWidget(self)
+        self.listRoles.setGeometry(QtCore.QRect(20, 280, 270, 131))
+        self.listRoles.setObjectName("listRoles")
         self.btn_insert = QtGui.QPushButton('INSERT',self)
-        self.btn_insert.setGeometry(QtCore.QRect(70, 410, 151, 61))
+        self.btn_insert.setGeometry(QtCore.QRect(100, 240, 91, 31))
         self.btn_insert.setObjectName("btn_insert")
         self.widget = QtGui.QWidget(self)
         self.widget.setGeometry(QtCore.QRect(30, 20, 270, 50))
@@ -75,10 +84,25 @@ class MyWindow(QtGui.QWidget):
         self.btn_connect.clicked.connect(self.BDConnect)
         self.treeWid.itemDoubleClicked.connect(self.SelDep)
         self.btn_insert.clicked.connect(self.InsertUser)
-        # self.listWid.itemClicked.connect(self.MySelect)
+        self.listFIO.itemClicked.connect(self.showGroups)
 
 #---------------------------------
         self.show()
+    
+    @QtCore.Slot()
+    def showGroups(self):
+        self.listRoles.clear()
+        conn=self.conn()
+        s=self.listFIO.currentItem ().text().split(' : ')
+        rows=conn.selectFio2(s[1])
+        
+        # print (rows[0][0])
+        rows=conn.getUserGroups(str(rows[0][0]))
+        # print (idGroups)
+        for row in rows:
+            self.listRoles.addItem(idGroups[row[0]])
+            # print(idGroups[row[0]])
+
     @QtCore.Slot()
     def SelDep(self):
         self.tree2Click()
@@ -86,7 +110,7 @@ class MyWindow(QtGui.QWidget):
     @QtCore.Slot()
     def InsertUser(self):
         conn=self.conn()
-        s=self.listWid.currentItem ().text().split(' : ')
+        s=self.listFIO.currentItem ().text().split(' : ')
         if conn.InsertUser(s[0],self.treeWid.currentItem().text(1)):
             QtGui.QMessageBox.information(self, 'Сообщение', 'Пользователь успешно добавлен!')
         else:
@@ -95,11 +119,11 @@ class MyWindow(QtGui.QWidget):
     
     @QtCore.Slot()
     def MySearchFio(self):
-        self.listWid.clear()
+        self.listFIO.clear()
         conn=self.conn()
         rows=conn.selectFio(self.txt_s.text())
         for row in rows:
-            self.listWid.addItem(str(row[0])+' : '+row[1])#str(row[0])- id
+            self.listFIO.addItem(str(row[0])+' : '+row[1])#str(row[0])- id
     
     @QtCore.Slot()
     def BDConnect(self):

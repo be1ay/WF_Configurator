@@ -47,10 +47,17 @@ class Connection(object):
             return True
         except:
             return False
-    def selectFio(self,name): # Поиск в БД
+    def selectFio(self,name): # Поиск в wfActors 
         self.ConnectDB()
         cursor=self.get_cursor()
         select=str("select * from wfActors where stDescription like '"+name+'%'+"' order by stDescription")
+        cursor.execute(select)
+        rows=cursor.fetchall()
+        return rows
+    def selectFio2(self,name): # Поиск в dsOrgUnits (в таблице wfActors id-user отличаются от id-user в таблице dsOrgUnits, странное решение АСКОН)
+        self.ConnectDB()
+        cursor=self.get_cursor()
+        select=str("select * from dsOrgUnits where stFullName like '"+name+'%'+"' order by stFullName")
         cursor.execute(select)
         rows=cursor.fetchall()
         return rows
@@ -67,3 +74,22 @@ class Connection(object):
         except:
             return False
 
+    def getGroups(self):
+        self.ConnectDB()
+        cursor=self.get_cursor()
+        cursor.execute("select * from dsUserGroups") # получаем список групп
+        rows = cursor.fetchall()
+        groupsId=[]
+        for row in rows:
+            groupsId.append(row[0])
+        T=tuple(groupsId) # создаем кортеж и инициализируем его значениями из списка (нужен именно кортеж, а не список из-за синтаксиса SQL-запроса, в нем нужны круглые скобки, как у кортежа, а не квадратные как у списка)
+        s="select * from dsOrgUnits where InId IN "+str(T) #
+        cursor.execute(s)
+        rows = cursor.fetchall()
+        return rows
+    def getUserGroups(self,uId):
+        self.ConnectDB()
+        cursor=self.get_cursor()
+        cursor.execute("select * from rlUsersAndGroups where InIdUser = "+uId)
+        rows = cursor.fetchall()
+        return rows
