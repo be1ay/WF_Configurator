@@ -16,12 +16,7 @@ class MyWindow(QtGui.QWidget):
     def __init__(self):
         super(MyWindow, self).__init__()
         self.initUI()
-        global idGroups
-        conn=self.conn()
-        rows=conn.getGroups() # получаем список групп которые есть в базе и сохраняем в словарь
-        for row in rows:
-            idGroups[row[0]]=row[1]
-        
+               
     def initUI(self):               
 #---------------------------------------------------------------------gui    
         # self.setGeometry(667, 667, 250, 250)
@@ -77,6 +72,7 @@ class MyWindow(QtGui.QWidget):
         self.horizontalLayout_2.addWidget(self.txt_s)
         self.btn_search = QtGui.QPushButton('Search',self.widget1)
         self.btn_search.setObjectName("btn_search")
+        self.btn_search.setEnabled(False)
         self.horizontalLayout_2.addWidget(self.btn_search)
 
 #---------bindings
@@ -131,6 +127,14 @@ class MyWindow(QtGui.QWidget):
         if(conn.ConnectDB()):
             self.BD_Connected()
             self.treeRoot()
+            global idGroups
+            conn=self.conn()
+            rows=conn.getGroups() # получаем список групп которые есть в базе и сохраняем в словарь
+            for row in rows:
+                idGroups[row[0]]=row[1]
+            self.btn_search.setEnabled(True)
+
+
         else:
             self.BD_NotConnected()
 
