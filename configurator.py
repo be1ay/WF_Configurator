@@ -9,7 +9,42 @@ tmp=f.read().split('\n')
 sqlServer=tmp[0]
 BDname=tmp[1]
 
-idGroups={} #словарь с группами
+# idGroups={} #словарь с группами
+class Add_Groups(QtGui.QWidget):
+    def __init__(self,list_groups):
+        super(Add_Groups, self).__init__()
+        self.initUI()
+        self.list_groups.addItems(list_groups)
+               
+    def initUI(self): 
+        self.setWindowTitle('Add Groups')
+        self.resize(356, 265)
+        self.gridLayout_2 = QtGui.QGridLayout(self)
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.gridLayout = QtGui.QGridLayout()
+        self.gridLayout.setObjectName("gridLayout")
+        self.list_groups = QtGui.QListWidget(self)
+        self.list_groups.setObjectName("list_groups")
+        self.gridLayout.addWidget(self.list_groups, 0, 0, 1, 2)
+        self.btn_OK = QtGui.QPushButton('OK',self)
+        self.btn_OK.setObjectName("btn_OK")
+        self.gridLayout.addWidget(self.btn_OK, 1, 0, 1, 1)
+        self.btn_cancel = QtGui.QPushButton('Cancel',self)
+        self.btn_cancel.setObjectName("btn_cancel")
+        self.gridLayout.addWidget(self.btn_cancel, 1, 1, 1, 1)
+        self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+        # Bindings
+        self.btn_cancel.clicked.connect(self.Cancel)
+        self.btn_OK.clicked.connect(self.OK)
+
+        self.show()
+    
+    @QtCore.Slot()
+    def OK(self):
+        self.close()
+    @QtCore.Slot()
+    def Cancel(self):
+        self.close()
 
 class MyWindow(QtGui.QWidget):
     
@@ -81,10 +116,59 @@ class MyWindow(QtGui.QWidget):
         self.treeWid.itemDoubleClicked.connect(self.SelDep)
         self.btn_insert.clicked.connect(self.InsertUser)
         self.listFIO.itemClicked.connect(self.showGroups)
-
+        # 21.10.2014 начал разработку контекстного меню для групп
+        # ----было несколько пунктов контекстного меню оставил 1
+        # lst=self.createActions()
+        # self.listRoles.addActions(lst)
+        # 06.01.2015
+        lst=self.createActions()
+        self.listRoles.addActions(lst)
+        # lst.setEnabled(False)
+        # ----
+        # self.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+        # self.listFIO.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.listRoles.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 #---------------------------------
         self.show()
-    
+    def add_groups(self):
+        conn=self.conn()
+        rows=conn.getGroups()
+        # список групп пользователя
+        grlist=self.showGroups()
+        # список всех групп
+        list_groups=[row[1] for row in rows]
+        # создаем список групп которых нет у пользователя
+        lst=[item for item in list_groups if item not in grlist]
+        self.second_window = Add_Groups(lst)
+ 
+    def del_groups(self):
+        conn=self.conn()
+        rows=conn.getGroups()
+        # список групп пользователя
+        grlist=self.showGroups()
+        self.second_window = Add_Groups(grlist)
+ 
+    # def paste(self):
+    #     QtGui.QMessageBox.information(self, 'Сообщение', 'PASTE!')
+    def createActions(self):
+        self.Add = QtGui.QAction("Add", self,
+                triggered=self.add_groups)
+ 
+        self.Delete = QtGui.QAction("Delete", self,
+                triggered=self.del_groups)
+ 
+        # self.pasteAct = QtGui.QAction("Paste", self,
+        #         triggered=self.paste)
+        # return (self.cutAct,self.copyAct,self.pasteAct)
+        return (self.Add,self.Delete)
+    # def contextMenuEvent(self, event):
+    #     menu = QtGui.QMenu(self)
+    #     menu.addAction(self.cutAct)
+    #     menu.addAction(self.copyAct)
+    #     menu.addAction(self.pasteAct)
+    #     menu.exec_(event.globalPos())
+        
+
     @QtCore.Slot()
     def showGroups(self):
         self.listRoles.clear()
@@ -92,12 +176,19 @@ class MyWindow(QtGui.QWidget):
         s=self.listFIO.currentItem ().text().split(' : ')
         rows=conn.selectFio2(s[1])
         
-        # print (rows[0][0])
+        # lst.setEnabled(True)
+        # Рабочий код переделал
+        # rows=conn.getUserGroups(str(rows[0][0]))
+        # for row in rows:
+        #     self.listRoles.addItem(idGroups[row[0]])
         rows=conn.getUserGroups(str(rows[0][0]))
-        # print (idGroups)
-        for row in rows:
-            self.listRoles.addItem(idGroups[row[0]])
-            # print(idGroups[row[0]])
+        grlist=[row[1] for row in rows]
+        # for row in rows:
+        #     glist.addItem(row[1])
+
+            # self.listRoles.addItem(row[1])
+        self.listRoles.addItems(grlist)
+        return grlist
 
     @QtCore.Slot()
     def SelDep(self):
@@ -127,14 +218,20 @@ class MyWindow(QtGui.QWidget):
         if(conn.ConnectDB()):
             self.BD_Connected()
             self.treeRoot()
-            global idGroups
-            conn=self.conn()
-            rows=conn.getGroups() # получаем список групп которые есть в базе и сохраняем в словарь
-            for row in rows:
-                idGroups[row[0]]=row[1]
+            # Рабочий код с группами
+            # ----------------------
+            # global idGroups
+            # conn=self.conn()
+            # rows=conn.getGroups() # получаем список групп которые есть в базе и сохраняем в словарь
+            # for row in rows:
+            #     idGroups[row[0]]=row[1]
+
+            # ----------------------
             self.btn_search.setEnabled(True)
+            
 
-
+            # self.second_window = Ui_Form_Groups()
+            
         else:
             self.BD_NotConnected()
 

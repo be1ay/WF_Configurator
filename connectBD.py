@@ -77,19 +77,80 @@ class Connection(object):
     def getGroups(self):
         self.ConnectDB()
         cursor=self.get_cursor()
-        cursor.execute("select * from dsUserGroups") # получаем список групп
-        rows = cursor.fetchall()
-        groupsId=[]
-        for row in rows:
-            groupsId.append(row[0])
-        T=tuple(groupsId) # создаем кортеж и инициализируем его значениями из списка (нужен именно кортеж, а не список из-за синтаксиса SQL-запроса, в нем нужны круглые скобки, как у кортежа, а не квадратные как у списка)
-        s="select * from dsOrgUnits where InId IN "+str(T) #
+        # Рабочий код получения групп, переделал проще через вызов хранимой процедуры
+        # ---------------------------------------------------------------------
+        # cursor.execute("select * from dsUserGroups") # получаем список групп
+        # rows = cursor.fetchall()
+        # groupsId=[]
+        # for row in rows:
+        #     groupsId.append(row[0])
+        # T=tuple(groupsId) # создаем кортеж и инициализируем его значениями из списка (нужен именно кортеж, а не список из-за синтаксиса SQL-запроса, в нем нужны круглые скобки, как у кортежа, а не квадратные как у списка)
+        # s="select * from dsOrgUnits where InId IN "+str(T) #
+        # cursor.execute(s)
+        # rows = cursor.fetchall()
+        # return rows
+        # -----------------------------------------------
+        s="""DECLARE @return_value int
+
+            EXEC    @return_value = [dbo].[prGetGroups]
+
+            SELECT  'Return Value' = @return_value"""
         cursor.execute(s)
         rows = cursor.fetchall()
         return rows
+
     def getUserGroups(self,uId):
+        # Рабочий код переделал через хранимую процедуру
+        # self.ConnectDB()
+        # cursor=self.get_cursor()
+        # cursor.execute("select * from rlUsersAndGroups where InIdUser = "+uId)
+        # rows = cursor.fetchall()
+        # return rows
         self.ConnectDB()
         cursor=self.get_cursor()
-        cursor.execute("select * from rlUsersAndGroups where InIdUser = "+uId)
+        s="""DECLARE @return_value int
+
+            EXEC    @return_value = [dbo].[prGetUserGroups] """+uId+"""
+
+            SELECT  'Return Value' = @return_value"""
+        cursor.execute(s)
         rows = cursor.fetchall()
         return rows
+
+
+    def getGroupId(self,group_name):
+        self.ConnectDB()
+        cursor=self.get_cursor()
+        s=""" DECLARE @return_value int,
+        @group_id int
+
+        EXEC    @return_value = [dbo].[prGetGroupId] N'"""+group_name+"""',@group_id = @group_id OUTPUT
+
+        SELECT  @group_id as N'@group_id'"""
+        cursor.execute(s)
+        rows = cursor.fetchall()
+        return rows
+
+
+    def deleteUserGroup(self,group_id,user_id):
+        self.ConnectDB()
+        cnxn=self.get_cnxn()
+        cursor=self.get_cursor()
+        s="delete from rlUsersAndGroups where inIdGroup="+group_id+" AND inIdUser="+user_id
+        try:
+            cursor.execute(s)
+            cnxn.commit()
+            return True
+        except:
+            return False
+    def insertUserGroup(self,group_id,user_id):
+        self.ConnectDB()
+        cnxn=self.get_cnxn()
+        cursor=self.get_cursor()
+        s="insert into rlUsersAndGroups values ("+group_id+","+user_id+")"
+        try:
+            cursor.execute(s)
+            cnxn.commit()
+            return True
+        except:
+            return False
