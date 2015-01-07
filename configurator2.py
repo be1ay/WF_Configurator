@@ -15,12 +15,15 @@ BDname=tmp[1]
 def conn(self):
     conn=Connection(sqlServer,BDname)
     return conn
-class SecondWindow(QtGui.QWidget,Add_Groups):
-    def __init__(self,list_groups,uId):
-        QtGui.QWidget.__init__(self)
+class AddWindow(QtGui.QWidget,Add_Groups):
+    def __init__(self,list_groups,uId,parent=None):
+        QtGui.QWidget.__init__(self,parent)
         # self.l_groups=list_groups
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowSystemMenuHint)
+        self.setWindowModality(QtCore.Qt.WindowModal)
         self.uId=uId
         self.setupUi(self)
+        self.move(parent.geometry().center()-self.rect().center()-QtCore.QPoint(4,30))
         self.list_groups.addItems(list_groups)
     @QtCore.Slot()
     def OK(self):
@@ -36,12 +39,15 @@ class SecondWindow(QtGui.QWidget,Add_Groups):
     def Cancel(self):
         self.close()
 
-class ThirdWindow(QtGui.QWidget,Del_Groups):
-    def __init__(self,list_groups,uId):
-        QtGui.QWidget.__init__(self)
+class DeleteWindow(QtGui.QWidget,Del_Groups):
+    def __init__(self,list_groups,uId,parent=None):
+        QtGui.QWidget.__init__(self,parent)
         # self.l_groups=list_groups
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowSystemMenuHint)
+        self.setWindowModality(QtCore.Qt.WindowModal)
         self.uId=uId
         self.setupUi(self)
+        self.move(parent.geometry().center()-self.rect().center()-QtCore.QPoint(4,30))
         self.list_groups.addItems(list_groups)
     @QtCore.Slot()
     def OK(self):
@@ -74,7 +80,7 @@ class MyWindow(QtGui.QWidget,MyMainWindow):
         # создаем список групп которых нет у пользователя
         lst=[item for item in list_groups if item not in grlist]
         # self.second_window = SecondWindow()
-        self.second_window = SecondWindow(lst,uId)
+        self.second_window = AddWindow(lst,uId,self)
         self.second_window.show()
 
     def del_groups(self):
@@ -82,7 +88,7 @@ class MyWindow(QtGui.QWidget,MyMainWindow):
         rows=conn.getGroups()
         # список групп пользователя
         grlist,uId=self.showGroups()
-        self.third_window = ThirdWindow(grlist,uId)
+        self.third_window = DeleteWindow(grlist,uId,self)
         self.third_window.show()
 
     def createActions(self):
