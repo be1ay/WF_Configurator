@@ -36,7 +36,7 @@ class Del_Groups(object):
         QtCore.QMetaObject.connectSlotsByName(Form_Groups)
         # Bindings
         self.btn_cancel.clicked.connect(self.Cancel)
-        self.btn_OK.clicked.connect(self.OK)
+        self.btn_OK.clicked.connect(self.Delete)
 
     def retranslateUi(self, Form_Groups):
         Form_Groups.setWindowTitle(QtGui.QApplication.translate("Form_Groups", "Delete Groups", None, QtGui.QApplication.UnicodeUTF8))

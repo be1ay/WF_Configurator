@@ -22,11 +22,12 @@ class AddWindow(QtGui.QWidget,Add_Groups):
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowSystemMenuHint)
         self.setWindowModality(QtCore.Qt.WindowModal)
         self.uId=uId
+        self.parent=parent
         self.setupUi(self)
         self.move(parent.geometry().center()-self.rect().center()-QtCore.QPoint(4,30))
         self.list_groups.addItems(list_groups)
     @QtCore.Slot()
-    def OK(self):
+    def Add(self):
         global conn
         cnn=conn(self)
         # print(self.list_groups.currentItem ().text())
@@ -35,6 +36,8 @@ class AddWindow(QtGui.QWidget,Add_Groups):
         # print(grId[0][0])
         # self.close()
         self.list_groups.takeItem(self.list_groups.currentRow ())
+        # self.parent.listRoles.repaint()
+        self.parent.showGroups()
     @QtCore.Slot()
     def Cancel(self):
         self.close()
@@ -46,11 +49,12 @@ class DeleteWindow(QtGui.QWidget,Del_Groups):
         self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.WindowSystemMenuHint)
         self.setWindowModality(QtCore.Qt.WindowModal)
         self.uId=uId
+        self.parent=parent
         self.setupUi(self)
         self.move(parent.geometry().center()-self.rect().center()-QtCore.QPoint(4,30))
         self.list_groups.addItems(list_groups)
     @QtCore.Slot()
-    def OK(self):
+    def Delete(self):
         global conn
         cnn=conn(self)
         # print(self.list_groups.currentItem ().text())
@@ -58,6 +62,7 @@ class DeleteWindow(QtGui.QWidget,Del_Groups):
         cnn.deleteUserGroup(str(grId[0][0]),str(self.uId))
         # print(grId[0][0])
         self.list_groups.takeItem(self.list_groups.currentRow ())
+        self.parent.showGroups()
         # self.close()
     @QtCore.Slot()
     def Cancel(self):
