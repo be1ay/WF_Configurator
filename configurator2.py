@@ -110,11 +110,19 @@ class MyWindow(QtGui.QWidget,MyMainWindow):
         self.listRoles.clear()
         conn=self.conn()
         s=self.listFIO.currentItem ().text().split(' : ')
-        rows=conn.selectFio2(s[1])
-        uId=str(rows[0][0])
-        rows=conn.getUserGroups(uId)
+        # rows=conn.selectFio2(s[1])
+
+        uId=conn.GetUserId(s[0])
+        # print (uId)
+        rows=conn.getUserGroups(str(uId))
         grlist=[row[1] for row in rows]
         self.listRoles.addItems(grlist)
+
+
+        login=conn.GetLogin(s[0])
+        login=str(uId)+' : '+str(login)
+        self.label_5.setText(login)
+        
         return grlist,uId
 
     @QtCore.Slot()

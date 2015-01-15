@@ -70,6 +70,11 @@ class MyMainWindow(object):
         self.label_4 = QtGui.QLabel(Form)
         self.label_4.setGeometry(QtCore.QRect(620, 410, 81, 20))
         self.label_4.setObjectName("label_4")
+# ---
+        self.label_5 = QtGui.QLabel(Form)
+        self.label_5.setGeometry(QtCore.QRect(20, 410, 256, 20))
+        self.label_5.setObjectName("label_5")
+# ---
         self.listRoles = QtGui.QListWidget(Form)
         self.listRoles.setGeometry(QtCore.QRect(20, 280, 311, 131))
         self.listRoles.setObjectName("listRoles")
@@ -97,4 +102,5 @@ class MyMainWindow(object):
         self.label_2.setText(QtGui.QApplication.translate("Form", "Database", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_connect.setText(QtGui.QApplication.translate("Form", "Connect", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Form", "2015 A.I.Belkin", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(QtGui.QApplication.translate("Form", "", None, QtGui.QApplication.UnicodeUTF8))
 

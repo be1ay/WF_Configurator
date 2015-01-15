@@ -154,3 +154,17 @@ class Connection(object):
             return True
         except:
             return False
+    def GetLogin(self,inIdActor):
+        self.ConnectDB()
+        cursor=self.get_cursor()
+        s="select dsOrgUnits.stName FROM dsOrgUnits inner join dsUserList on dsUserList.inIdUser = dsOrgUnits.inId where dsUserList.inIdActor = "+inIdActor
+        cursor.execute(s)
+        rows = cursor.fetchall()
+        return rows[0][0]
+    def GetUserId(self,inIdActor):
+        self.ConnectDB()
+        cursor=self.get_cursor()
+        s="select dsUserList.inIdUser from dsUserList where dsUserList.inIdActor = "+inIdActor
+        cursor.execute(s)
+        rows = cursor.fetchall()
+        return rows[0][0]
