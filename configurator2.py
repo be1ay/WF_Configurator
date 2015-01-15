@@ -1,4 +1,5 @@
-# 2015 A.I.Belkin
+# Copyright 2015 Belkin Alexey Igorevich
+# Licensed under the Apache License, Version 2.0
 import sys
 from PySide import QtGui, QtCore
 from MainWindow import MyMainWindow

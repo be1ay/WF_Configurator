@@ -1,4 +1,5 @@
-# 2014 September A.I.Belkin
+# Copyright 2015 Belkin Alexey Igorevich
+# Licensed under the Apache License, Version 2.0
 import pypyodbc
 
 class Connection(object):
